@@ -2,6 +2,8 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 const password = require("./private");
 var table = require("console.table");
+var figlet = require('figlet');
+
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -21,9 +23,21 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function(err) {
   if (err) throw err;
+  //old school style ASCII intro to app
+   figlet('Business Manager', function(err, data) {
+     if (err) {
+         console.log('Something went wrong...');
+        console.dir(err);
+     return;
+     }
+     console.log(data)
+   });
   // run the start function after the connection is made to prompt the user
   start();
 });
+
+ 
+
 
 // function which prompts the user for what action they should take - VIEW, ADD or CHANGE
 function start() {
@@ -32,7 +46,7 @@ function start() {
       name: "viewOrAdd",
       type: "list",
       message: "Would you like to [VIEW] information, [ADD] information or [CHANGE] information from business databases?",
-      choices: ["VIEW", "ADD", "CHANGE", "EXIT"]
+      choices: ["VIEW", "ADD", "CHANGE", "EXIT", " "]
     })
     .then(function(answer) {
       // based on their answer,  call the right functions
@@ -63,7 +77,8 @@ function ViewInformation() {
         "View all employees",
         "View all departments",
         "View all roles",
-        "View employees by department",
+        "View employees by manager",
+        "View employees by department"
       ]
     })
     .then(function(answer) {
@@ -72,8 +87,8 @@ function ViewInformation() {
         employeeSearch();
         break;
 
-      case "View all employees by department":
-        employeeByDepartmentSearch();
+      case "View all employees by manager":
+        employeeByManagerSearch();
         break;
 
       case "View all departments":
@@ -83,6 +98,10 @@ function ViewInformation() {
       case "View all roles":
         rolesSearch();
         break;
+
+        case "View employees by department":
+          employeeByDepartmentSearch();
+          break;
       }
     });
 }
@@ -128,14 +147,59 @@ function rolesSearch() {
     });
   }
 
+
+  // beginning stages of employee search decided by managers, using classes
+  async function employeeByManagerSearch(){
+    //let managers;
+    //let managerList;
+    console.log(" Coming up soon on version 2.0 of this app ");
+    console.log("We appreciate your business.");
+    // await business_db.getManagerNames()
+    // .then(res=>{
+    //     managers = res; 
+    //     managerList = managers.map(e => e.name);                    
+    //     managerList.push("Cancel");                        
+    // });           
+                 
+    // await inquirer.prompt({
+    //     message:"Choose a manager:",
+    //     type: "list",
+    //     choices: managerList,
+    //     name: "choice"
+    // }).then(async function(answer){
+    //     switch (answer.choice){
+    //     case "Cancel":
+    //        // should return to previous choices
+    //         break;
+    //     default:
+    //         //looks up right manager from list created by getManagerNames
+    //         manager = managers.find(e => e.name === answer.choice);
+    //         await business_db.getEmployeesByManager(manager).then(res=>{
+    //             dispayResults(res);
+    //         });
+    //         break;
+    //     }
+        
+    // });
+    start();
+}
+
+
+
+  //upcoming function to search employees by department
+  function employeeByDepartmentSearch() {
+    console.log("Coming soon on version 2.0 of this app !!");
+    start();
+  }
+
 // Function that shows all departments
 function departmentSearch() {
     var query = "SELECT * FROM businessdb.department";
     connection.query(query, function(err, res) {
    
       console.table(res);
-      })
       start();
+      })
  //   });
   }
 
@@ -181,7 +245,7 @@ function departmentAdd() {
 
   
 
-// function to let user chose what information they would like to view
+// function to let user add an employee
 function employeeAdd() {
   // prompt for info about the employee. first name, last name, their job id and if they have a manager that employee's ID
   inquirer
@@ -241,65 +305,114 @@ function employeeAdd() {
     start();
 }
 
-function bidAuction() {
-  // query the database for all items being auctioned
-  connection.query("SELECT * FROM auctions", function(err, results) {
-    if (err) throw err;
-    // once you have the items, prompt the user for which they'd like to bid on
-    inquirer
-      .prompt([
-        {
-          name: "choice",
-          type: "rawlist",
-          choices: function() {
-            var choiceArray = [];
-            for (var i = 0; i < results.length; i++) {
-              choiceArray.push(results[i].item_name);
-            }
-            return choiceArray;
-          },
-          message: "What auction would you like to place a bid in?"
-        },
-        {
-          name: "bid",
-          type: "input",
-          message: "How much would you like to bid?"
-        }
-      ])
-      .then(function(answer) {
-        // get the information of the chosen item
-        var chosenItem;
-        for (var i = 0; i < results.length; i++) {
-          if (results[i].item_name === answer.choice) {
-            chosenItem = results[i];
-          }
-        }
 
-        // determine if bid was high enough
-        if (chosenItem.highest_bid < parseInt(answer.bid)) {
-          // bid was high enough, so update db, let the user know, and start over
-          connection.query(
-            "UPDATE auctions SET ? WHERE ?",
-            [
-              {
-                highest_bid: answer.bid
-              },
-              {
-                id: chosenItem.id
-              }
-            ],
-            function(error) {
-              if (error) throw err;
-              console.log("Bid placed successfully!");
-              start();
-            }
-          );
+// function to let user add a new job/role
+function roleAdd() {
+  // prompt for info about job/role to add. first name, last name, their job id and if they have a manager that employee's ID
+  inquirer
+    .prompt([
+      {
+        name: "jobTitle",
+        type: "input",
+        message: "What is the title name for this job ?"
+      },
+      {
+        name: "salaryValue",
+        type: "input",
+        message: "What is the annual salary for this position in the Business ?"
+      },
+      {
+        name: "deptId",
+        type: "input",
+        message: "What is the id of the department this position belongs to ?",
+        validate: function(value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
         }
-        else {
-          // bid wasn't high enough, so apologize and start over
-          console.log("Your bid was too low. Try again...");
+      }  
+      
+    ])
+    .then(function(answer) {
+      // when finished prompting, insert a new role/job title with that info in the corresponding database
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          title: answer.jobTitle,
+          salary: answer.salaryValue,
+          department_id: answer.deptId || 1,
+        },
+        function(err) {
+          if (err) throw err;
+          console.log("Your new department was added successfully!");
+          // re-prompt the user for what they would like to do next in the database
           start();
         }
-      });
-  });
+      );
+    });
 }
+
+
+// Yes, I am aware this last function is not working yet, so beware... until version 2.0
+
+function ChangeInformation() {
+
+  // let's start off by making this function a litte fun shall we ? De mada!
+  // a little ASCII message
+  figlet('Presto', function(err, data) {
+    if (err) {
+        console.log('Something went wrong...');
+       console.dir(err);
+    return;
+    }
+    console.log(data)
+  });
+  // and a little magic clothes change...
+  console.log(" Pronto! Your employee changed clothes!! Now, let's presto change their info ?"); 
+  // before the serious inquiry about which employee to chage information
+  inquirer
+  .prompt([
+  {
+    name: "Employee_firstname",
+    type: "input",
+    message: "What is the First name of the employee you would like to change the information ?",
+    
+  },  
+  {
+    name: "Employee_lasttname",
+    type: "input",
+    message: "What is the last name of the employee you would like to change the information ?",
+    
+    } 
+  ])
+    .then(function(answer) {
+      var fullname = res.Employee_firstname + " " + res.Employee_lastname;
+      // when finished prompting, concatenate fields on database and inputs into fullnames
+      connection.query(
+        "SELECT CONCAT(FirstName, ' ', LastName) As FullName FROM Employee",
+        function checkemployee() {
+          if ( fullname == employeeAdd.Fullname) {
+            console.log(" Employee exists and already changed clothes! presto!");
+
+          } else {
+            console.log("booo... we couldn't find that employee");
+          }
+        },
+        function(err) {
+          if (err) throw err;
+          console.log("Your employee looks good!");
+          // re-prompt the user for what they would like to do next in the database
+          start();
+        }
+        );
+    });
+   }
+    
+   // if (concatenate(res.Employee_firstname, res.Employee_lastname) == concatenate(employee.first_name, employee.lastname), {
+     
+     
+
+
+
+
