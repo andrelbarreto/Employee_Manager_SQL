@@ -1,3 +1,7 @@
+// This is a very old school, all in one file code approach despite being fully aware of recomendations to use the same folder
+// file parsing system from previous homework. Consider this a test of this approach vs the one currently presented.
+// I appreciate the extra work in checking this code and the understanding for what went kaput
+
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 const password = require("./private");
