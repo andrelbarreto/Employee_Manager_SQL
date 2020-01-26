@@ -1,0 +1,23 @@
+{
+  "name": "mysql-homework",
+  "version": "1.0.0",
+  "description": "Allows you to use and manipulate Business Database for employees, roles, and departments",
+  "main": "Amigo_Employee_Manager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Employee_Manager_SQL"
+  },
+  "keywords": [
+    "business"
+  ],
+  "author": "Andre Barreto",
+  "license": "ISC",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^7.0.4",
+    "mysql": "^2.18.1"
+  }
+}
